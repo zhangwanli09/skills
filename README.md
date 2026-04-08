@@ -13,6 +13,7 @@ This repository is a [Claude Code](https://claude.ai/code) plugin. It packages s
 | Skill | Description |
 |-------|-------------|
 | [example-skill](./skills/example-skill/SKILL.md) | Template demonstrating the standard skill structure |
+| [init-nextjs](./skills/init-nextjs/SKILL.md) | Initialize a new Next.js app with Prettier and pre-commit git hooks |
 
 ### Commands
 
