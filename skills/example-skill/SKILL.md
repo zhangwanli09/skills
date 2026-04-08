@@ -1,5 +1,5 @@
 ---
-name: Example Skill
+name: example-skill
 description: A template skill demonstrating the standard SKILL.md format. Use this as a starting point when creating new skills in this plugin project.
 version: 1.0.0
 ---
