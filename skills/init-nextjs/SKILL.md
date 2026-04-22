@@ -5,64 +5,79 @@ description: Initialize a new Next.js application with Prettier and git hooks (p
 
 # Initialize a New Next.js App
 
-This skill sets up a new Next.js project with the latest official recommended defaults, then adds Prettier formatting and a pre-commit git hook.
+This skill sets up a new Next.js project with official defaults, then adds Prettier formatting and a pre-commit git hook. The command sequence is fixed — execute the phases in order without looking anything up.
 
-**Important**: Before executing any step, always fetch the latest documentation using the context7 MCP tool (or web search as fallback). The commands, flags, and config formats for these tools evolve over time — never rely on memorized defaults.
-
----
-
-## Phase 0: Research Latest Docs (always do this first)
-
-Before writing a single command, look up the current recommended setup for each tool. Run these lookups in parallel:
-
-1. **create-next-app** — fetch `/vercel/next.js` from context7, query "create-next-app CLI flags skip prompts installation". Find the current recommended command to create a project non-interactively with official defaults.
-
-2. **Prettier** — fetch `/websites/prettier_io` from context7, query "prettier installation configuration setup". Find the current install command and recommended `.prettierrc` setup.
-
-3. **Husky** — fetch `/typicode/husky` from context7, query "husky installation setup pre-commit hook". Find the current init command, how to create a pre-commit hook, and confirm the current recommended way to write the pre-commit hook file content.
-
-4. **lint-staged** — fetch `/lint-staged/lint-staged` from context7, query "lint-staged recommended setup with prettier". Find the current install, recommended configuration format, and how to wire it with Husky.
-
-5. **eslint-config-prettier** — check whether it's still the recommended way to prevent ESLint/Prettier conflicts in a Next.js project.
+All `@latest` tags resolve to the current stable release at install time, so no doc lookups are needed.
 
 ---
 
 ## Phase 1: Create the Next.js App
 
-Ask the user for the project name if not already provided.
+Ask the user for the project name if not already provided. Then run:
 
-Using the command found in Phase 0, create the app non-interactively with official recommended defaults (skip all prompts). Then `cd` into the project directory.
+```bash
+npx create-next-app@latest <name> --yes
+cd <name>
+```
+
+`--yes` accepts all create-next-app defaults non-interactively. Do not prompt the user for framework options.
 
 ---
 
 ## Phase 2: Add Prettier
 
-Using the setup steps found in Phase 0:
+1. Install dependencies:
+   ```bash
+   npm install --save-dev --save-exact prettier
+   npm install --save-dev eslint-config-prettier
+   ```
+2. Create `.prettierrc` with contents `{}` (use all Prettier defaults — do not ask the user for preferences).
+3. Create `.prettierignore` with at least:
+   ```
+   .next/
+   node_modules/
+   package-lock.json
+   ```
+4. Wire `eslint-config-prettier` into the generated ESLint config:
+   - If the project has `eslint.config.mjs` (Next.js 15+ flat config), append `"prettier"` to the end of the extends array.
+   - If the project has the legacy `.eslintrc.json`, append `"prettier"` to the end of its `extends` array.
 
-1. Install Prettier (and eslint-config-prettier if still recommended) as dev dependencies.
-2. Create an empty `.prettierrc` (`{}`) to use all Prettier defaults — do not ask the user for preferences.
-3. Update the ESLint config to disable rules that conflict with Prettier (inspect the existing ESLint config format in the generated project first, then extend it correctly).
+   The `prettier` entry must come last so it can disable conflicting rules from earlier configs.
 
 ---
 
 ## Phase 3: Set Up Git Hooks (Husky + lint-staged)
 
-Using the setup steps found in Phase 0:
-
-1. Install Husky and lint-staged as dev dependencies.
-2. Initialize Husky.
-3. Create the pre-commit hook file using the current recommended format confirmed in Phase 0 — it should run lint-staged.
-4. Configure lint-staged using the wildcard pattern with `--ignore-unknown` flag:
+1. Install dependencies:
+   ```bash
+   npm install --save-dev husky lint-staged
+   ```
+2. Initialize Husky:
+   ```bash
+   npx husky init
+   ```
+   This creates `.husky/pre-commit` and adds a `"prepare": "husky"` script to `package.json`.
+3. Replace the contents of `.husky/pre-commit` with a single line:
+   ```
+   npx lint-staged
+   ```
+4. Add the lint-staged config to `package.json`:
    ```json
-   { "*": "prettier --ignore-unknown --write" }
+   "lint-staged": { "*": "prettier --ignore-unknown --write" }
    ```
 
 ---
 
 ## Phase 4: Verify
 
-1. Run Prettier over all existing files to format them from the start.
-2. Run the project's linter to confirm no ESLint/Prettier conflicts.
+1. Format existing files:
+   ```bash
+   npx prettier --write .
+   ```
+2. Run the linter to confirm no ESLint/Prettier conflicts:
+   ```bash
+   npm run lint
+   ```
 3. Report and fix any issues before declaring success.
 
 ---
