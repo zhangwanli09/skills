@@ -3,7 +3,7 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "处理一下 bug 123",
+      "prompt": "处理一下禅道 bug 123",
       "expected_output": "运行 zentao bug 123，完整阅读单据和历史记录，打开所有截图；在当前仓库中定位相关代码；按 bug 模板在对话中给出结构化工单，不在项目里生成文件；判断能否开工，可开工时给出实现计划并等待确认；不执行写操作。",
       "files": [],
       "assertions": [
@@ -30,7 +30,7 @@
     },
     {
       "id": 3,
-      "prompt": "bug 123 我已经改完了，提交是 abc1234，帮我回写禅道并把单子解决掉",
+      "prompt": "禅道 bug 123 我已经改完了，提交是 abc1234，帮我回写禅道并把单子解决掉",
       "expected_output": "按修复说明格式起草备注（原因/修改/影响范围/自测/测试建议），说明将用 resolve -r fixed -b trunk；展示草稿并请求确认，确认前不执行 zentao resolve；注意到 abc1234 在仓库中找不到时如实指出。",
       "files": [],
       "assertions": [
