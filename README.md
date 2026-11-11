@@ -12,6 +12,7 @@ npx skills add zhangwanli09/skills
 
 - [dev-schedule](./skills/dev-schedule/SKILL.md) — Turn a PRD into a formatted dev scheduling xlsx with honest hour estimates.
 - [monthly-work-summary](./skills/monthly-work-summary/SKILL.md) — Build a monthly work report from your git commits. Manual invocation only (`/monthly-work-summary`).
+- [codex-third-party-model](./skills/codex-third-party-model/SKILL.md) — Configure third-party model providers for Codex CLI through isolated profiles.
 
 ## License
 
