@@ -1,0 +1,44 @@
+{
+  "skill_name": "agent-config-sync",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "只检查 {{project}} 的 coding agent 兼容性，不改文件。我们用 Codex、Claude Code、Cursor、Gemini CLI、Copilot 和 OpenCode。项目已有 .claude/skills/review（带 scripts、二进制 assets 和 references）、CLAUDE.md 与 .mcp.json，不能丢掉现有设置。请给出有官方来源的同步方案。",
+      "expected_output": "A read-only audit separating instructions, skill discovery and MCP; versions/surfaces and current primary sources; a canonical-source decision; whole-package adapters only where needed; no edits, no MCP starts, no credentials in output; explicit runtime limitations.",
+      "fixture": "fixtures/read-only.json",
+      "files": ["evals/fixtures/read-only.json", "evals/setup_fixture.py", "evals/evals.json", "evals/README.md"],
+      "assertions": [
+        "Does not modify the target project in check mode.",
+        "Separates discovery support from parsing and connectivity.",
+        "Preserves complete skill packages and existing client-specific settings.",
+        "Provides primary URLs and verification date for material compatibility decisions."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "把 {{project}} 里的项目配置同步给 Codex、Claude Code、Cursor、Gemini CLI、GitHub Copilot 和 OpenCode。团队有 Windows/macOS，已有 .agents/skills 为源，.claude/skills/review 副本有同事刚改的内容。保留 Gemini 原来的 GEMINI.md；Copilot 用 VS Code Copilot harness，旧 .vscode/mcp.json 还用了 ${input:token} 和 sandboxEnabled；OpenCode 是 V1。只同步可以保持行为的部分。",
+      "expected_output": "Per-client version-aware edits; copy strategy with ownership/hash conflict protection instead of forced symlinks; preserve colleague changes and Gemini context; no forced OpenCode major migration; keep unsupported editor MCP restrictions unresolved; no bypass of input secrets or sandboxing; repeatable no-diff second sync.",
+      "fixture": "fixtures/windows-conflict.json",
+      "files": ["evals/fixtures/windows-conflict.json", "evals/setup_fixture.py", "evals/evals.json", "evals/README.md"],
+      "assertions": [
+        "Preserves divergent destination edits and reports the conflict.",
+        "Does not blindly replace VS Code servers with portable mcpServers or drop editor restrictions.",
+        "Does not apply V2 OpenCode schema to the installed V1 client.",
+        "Provides a repeatable sync/check mechanism and checks idempotence."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "修复 {{project}} 的 agent 配置漂移，覆盖 Codex、Claude Code、Cursor、Gemini CLI、GitHub Copilot 和 OpenCode：根目录和 packages/api 都有 AGENTS.md，.claude/skills/broken 是断链，另一个 skill 链接指向项目外。JSONC 配置有注释和逗号，MCP 的命令参数里包含空格，HTTP/SSE 不要混掉，禁用的服务器也不能自动启动。我们从 packages/api 启动工具，只做项目级修改。",
+      "expected_output": "Nested-scope audit; broken/external links reported without writes outside project; real JSONC parsing with comment preservation; ordered command arguments, transport, disabled state and cwd retained; no global edits or server launch; separate unverified client behavior.",
+      "fixture": "fixtures/nested-drift.json",
+      "files": ["evals/fixtures/nested-drift.json", "evals/setup_fixture.py", "evals/evals.json", "evals/README.md"],
+      "assertions": [
+        "Preserves nested instruction scope and verifies the normal subdirectory launch path.",
+        "Does not follow external links to write outside the project.",
+        "Uses a JSONC-capable parser rather than regex comment stripping.",
+        "Preserves argument boundaries, transport, disabled state, and credential references."
+      ]
+    }
+  ]
+}

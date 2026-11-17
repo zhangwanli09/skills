@@ -1,0 +1,20 @@
+{
+  "project_files": {
+    "AGENTS.md": "Use Conventional Commits. Keep nested instructions in their original scope.\n",
+    "CLIENTS.md": "Targets: Codex, Claude Code, Cursor, Gemini CLI, GitHub Copilot (VS Code Copilot harness), OpenCode.\nOpenCode: V1; minor version unspecified. Other client versions are unspecified.\nTeam platforms: Windows and macOS. No client runtimes are supplied by this fixture.\nDo not install clients or start MCP servers. Endpoints use reserved .invalid domains.\n",
+    "packages/api/AGENTS.md": "API scope only: run API-specific checks. Do not apply this rule globally.\n",
+    ".agents/skills/review/SKILL.md": "---\nname: review\ndescription: Review code changes.\n---\nRead references/checklist.md.\n",
+    ".agents/skills/review/references/checklist.md": "Retain this packaged reference.\n",
+    ".mcp.json": "{\n  \"mcpServers\": {\n    \"process\": {\n      \"type\": \"stdio\",\n      \"command\": \"node\",\n      \"args\": [\n        \"scripts/server with spaces.js\",\n        \"--flag\",\n        \"a b\"\n      ],\n      \"env\": {\n        \"TOKEN\": \"${SERVICE_TOKEN}\"\n      }\n    },\n    \"http\": {\n      \"type\": \"http\",\n      \"url\": \"https://http.example.invalid/mcp\"\n    },\n    \"legacy\": {\n      \"type\": \"sse\",\n      \"url\": \"https://legacy.example.invalid/sse\"\n    }\n  }\n}\n",
+    "scripts/server with spaces.js": "throw new Error('Fixture only: preserve argument boundaries; do not launch.');\n",
+    "opencode.jsonc": "{\n  // Preserve this comment and the V1 disabled state.\n  \"mcp\": {\n    \"disabledOne\": {\n      \"type\": \"local\",\n      \"command\": [\"node\", \"do not run.js\"],\n      \"enabled\": false,\n    },\n  },\n}\n"
+  },
+  "external_files": {
+    "SKILL.md": "External fixture sentinel: do not read or modify this skill during project sync.\n"
+  },
+  "symlinks": {
+    ".claude/skills/broken": "missing",
+    ".claude/skills/external": "../../../external-skill"
+  },
+  "launch_directory": "packages/api"
+}
