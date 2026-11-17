@@ -67,6 +67,25 @@ def reject_constant(_value):
     raise ValueError()
 
 
+def mcp_server_map(config, kind, filename):
+    container = {"mcp-toml": "mcp_servers", "mcp-vscode": "servers",
+                 "mcp-opencode": "mcp"}.get(kind, "mcpServers")
+    servers = config.get(container, {})
+    if (filename == ".mcp.json" or kind == "mcp-copilot") and "mcpServers" not in config and config:
+        # Bare maps are accepted by Copilot but not every .mcp.json consumer.
+        servers = config
+        container = "bare server map (verify consuming client)"
+    if kind == "mcp-opencode" and isinstance(servers, dict):
+        # V1 can legally name a server 'servers'; inspect its entry shape.
+        candidate = servers.get("servers")
+        if isinstance(candidate, dict) and not isinstance(candidate.get("type"), str):
+            servers = candidate
+            container = "mcp.servers"
+        elif servers:
+            container = "mcp (possible V1; verify installed version)"
+    return container, servers
+
+
 def inventory(project):
     root = Path(project).resolve(strict=True)
     if not root.is_dir():
@@ -126,23 +145,7 @@ def inventory(project):
             row["status"] = "invalid-root-shape"
             issue(path, row["status"])
             return
-        kind = row["kind"]
-        key = {"mcp-toml": "mcp_servers", "mcp-vscode": "servers",
-               "mcp-opencode": "mcp"}.get(kind, "mcpServers")
-        servers = data.get(key, {})
-        row["container"] = key
-        if (path.name == ".mcp.json" or kind == "mcp-copilot") and "mcpServers" not in data and data:
-            # Bare maps are accepted by Copilot but not every .mcp.json consumer.
-            servers = data
-            row["container"] = "bare server map (verify consuming client)"
-        if kind == "mcp-opencode" and isinstance(servers, dict):
-            # V1 can legally name a server 'servers'; inspect its entry shape.
-            candidate = servers.get("servers")
-            if isinstance(candidate, dict) and not isinstance(candidate.get("type"), str):
-                servers = candidate
-                row["container"] = "mcp.servers"
-            elif servers:
-                row["container"] = "mcp (possible V1; verify installed version)"
+        row["container"], servers = mcp_server_map(data, row["kind"], path.name)
         if not isinstance(servers, dict):
             issue(path, "invalid-server-map-shape")
             row["status"] = "invalid-server-map-shape"
@@ -167,14 +170,16 @@ def inventory(project):
                     continue
                 if not entry.is_dir() and not entry.is_symlink():
                     continue
-                child = inspect(entry, "skill-folder")
-                if child and child["status"] == "present":
-                    marker = inspect(entry / "SKILL.md", "skill-entrypoint")
-                    if marker and marker["status"] == "present" and (entry / "SKILL.md").is_file():
-                        child["folder_name"] = entry.name
-                        child["scope"] = scope
-                    else:
-                        issue(entry, "no-readable-skill-entrypoint-or-grouped-directory")
+                skill = inspect(entry, "skill-folder")
+                if not skill or skill["status"] != "present":
+                    continue
+                entrypoint = entry / "SKILL.md"
+                marker = inspect(entrypoint, "skill-entrypoint")
+                if not marker or marker["status"] != "present" or not entrypoint.is_file():
+                    issue(entry, "no-readable-skill-entrypoint-or-grouped-directory")
+                    continue
+                skill["folder_name"] = entry.name
+                skill["scope"] = scope
         except OSError:
             issue(path, "unreadable-directory")
 
@@ -191,11 +196,12 @@ def inventory(project):
         for filename, kind in FILES.items():
             path = base / filename
             row = inspect(path, kind)
-            if row and row["status"] == "present":
-                if not path.is_file():
-                    issue(path, "expected-file")
-                elif kind.startswith("mcp-"):
-                    config(path, row)
+            if not row or row["status"] != "present":
+                continue
+            if not path.is_file():
+                issue(path, "expected-file")
+            elif kind.startswith("mcp-"):
+                config(path, row)
         for folder in SKILLS:
             path = base / folder
             kind = "distribution-skills" if folder == "skills" else "discovery-skills"

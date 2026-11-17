@@ -48,6 +48,30 @@ def snapshot(root):
     return result
 
 
+def populate_fixture(run, fixture):
+    """Create the files, Git boundary, and links inside a fresh run directory."""
+    project, external = run / "project", run / "external-skill"
+    project.mkdir()
+    write_files(project, fixture["project_files"])
+    write_files(project, fixture.get("binary_files", {}), binary=True)
+    write_files(external, fixture.get("external_files", {}))
+    for name in fixture.get("executable_files", []):
+        path = child(project, name)
+        path.chmod(path.stat().st_mode | stat.S_IXUSR)
+    # Git supplies a real repository boundary, without commits or network.
+    # Ignore inherited Git overrides and user template directories.
+    env = {key: value for key, value in os.environ.items() if not key.startswith("GIT_")}
+    subprocess.run(["git", "init", "--quiet", "--template=", str(project)],
+                   check=True, capture_output=True, env=env)
+    for name, target in fixture.get("symlinks", {}).items():
+        path = child(project, name)
+        if Path(target).is_absolute() or not (path.parent / target).resolve().is_relative_to(run):
+            raise ValueError("Fixture symlink targets must remain inside this run.")
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.symlink_to(target, target_is_directory=True)
+    return project, external
+
+
 def prepare(eval_id, workspace):
     definitions = json.loads((EVAL_DIR / "evals.json").read_text(encoding="utf-8"))
     case = next((case for case in definitions["evals"] if case["id"] == eval_id), None)
@@ -58,26 +82,8 @@ def prepare(eval_id, workspace):
     workspace = Path(workspace).resolve()
     workspace.mkdir(parents=True, exist_ok=True)
     run = Path(tempfile.mkdtemp(prefix=f"eval-{eval_id}-", dir=workspace))
-    project, external = run / "project", run / "external-skill"
     try:
-        project.mkdir()
-        write_files(project, fixture["project_files"])
-        write_files(project, fixture.get("binary_files", {}), binary=True)
-        write_files(external, fixture.get("external_files", {}))
-        for name in fixture.get("executable_files", []):
-            path = child(project, name)
-            path.chmod(path.stat().st_mode | stat.S_IXUSR)
-        # Git supplies a real repository boundary, without commits or network.
-        # Ignore inherited Git overrides and user template directories.
-        env = {key: value for key, value in os.environ.items() if not key.startswith("GIT_")}
-        subprocess.run(["git", "init", "--quiet", "--template=", str(project)],
-                       check=True, capture_output=True, env=env)
-        for name, target in fixture.get("symlinks", {}).items():
-            path = child(project, name)
-            if Path(target).is_absolute() or not (path.parent / target).resolve().is_relative_to(run):
-                raise ValueError("Fixture symlink targets must remain inside this run.")
-            path.parent.mkdir(parents=True, exist_ok=True)
-            path.symlink_to(target, target_is_directory=True)
+        project, external = populate_fixture(run, fixture)
         launch = child(project, fixture.get("launch_directory", "."))
         if not launch.is_dir():
             raise ValueError("Fixture launch directory does not exist.")
