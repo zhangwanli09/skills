@@ -1,0 +1,18 @@
+{
+  "project_files": {
+    "AGENTS.md": "Use Conventional Commits. Keep nested instructions in their original scope.\n",
+    "CLIENTS.md": "Targets: Codex, Claude Code, Cursor, Gemini CLI, GitHub Copilot (VS Code Copilot harness), OpenCode.\nOpenCode: V1; minor version unspecified. Other client versions are unspecified.\nTeam platforms: Windows and macOS. No client runtimes are supplied by this fixture.\nDo not install clients or start MCP servers. Endpoints use reserved .invalid domains.\n",
+    ".agents/skills/review/SKILL.md": "---\nname: review\ndescription: Review code changes.\n---\nRead references/checklist.md before reviewing public interfaces.\n",
+    ".agents/skills/review/references/checklist.md": "Check public interfaces.\n",
+    ".claude/skills/review/SKILL.md": "---\nname: review\ndescription: Review code changes.\n---\nColleague edits: also check billing invariants. Preserve this divergent copy.\n",
+    ".claude/skills/review/references/checklist.md": "Check public interfaces and billing invariants.\n",
+    "GEMINI.md": "Keep Gemini-specific testing guidance.\n",
+    "TEAM.md": "Preserve this additional context file.\n",
+    ".gemini/settings.json": "{\n  \"context\": {\n    \"fileName\": [\n      \"GEMINI.md\",\n      \"TEAM.md\"\n    ]\n  },\n  \"theme\": \"Default\"\n}\n",
+    ".vscode/mcp.json": "{\n  \"inputs\": [\n    {\n      \"id\": \"token\",\n      \"type\": \"promptString\",\n      \"password\": true\n    }\n  ],\n  \"servers\": {\n    \"locked\": {\n      \"type\": \"stdio\",\n      \"command\": \"node\",\n      \"args\": [\n        \"scripts/editor-server.js\"\n      ],\n      \"env\": {\n        \"TOKEN\": \"${input:token}\"\n      },\n      \"sandboxEnabled\": true,\n      \"sandbox\": {\n        \"network\": {\n          \"allowedDomains\": [\n            \"docs.example.invalid\"\n          ]\n        }\n      }\n    }\n  }\n}\n",
+    "scripts/editor-server.js": "throw new Error('Fixture only: do not launch this MCP server.');\n",
+    "opencode.json": "{\n  \"mcp\": {\n    \"docs\": {\n      \"type\": \"remote\",\n      \"url\": \"https://docs.example.invalid/mcp\",\n      \"enabled\": false\n    }\n  },\n  \"skills\": {\n    \"paths\": [\n      \"./team-skills\"\n    ]\n  }\n}\n",
+    "team-skills/README.md": "Custom skill discovery location: preserve the existing setting.\n"
+  },
+  "launch_directory": "."
+}

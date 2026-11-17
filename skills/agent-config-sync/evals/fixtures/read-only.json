@@ -1,0 +1,18 @@
+{
+  "project_files": {
+    "AGENTS.md": "Use Conventional Commits. Keep nested instructions in their original scope.\n",
+    "CLIENTS.md": "Targets: Codex, Claude Code, Cursor, Gemini CLI, GitHub Copilot (VS Code Copilot harness), OpenCode.\nOpenCode: V1; minor version unspecified. Other client versions are unspecified.\nTeam platforms: Windows and macOS. No client runtimes are supplied by this fixture.\nDo not install clients or start MCP servers. Endpoints use reserved .invalid domains.\n",
+    "CLAUDE.md": "Shared rule: run relevant checks before finishing changes.\nClaude-specific rule: write concise reports.\n",
+    ".claude/skills/review/SKILL.md": "---\nname: review\ndescription: Review code changes and their public interfaces.\n---\nRead references/checklist.md. Run scripts/check.py only when the user requests it.\n",
+    ".claude/skills/review/references/checklist.md": "Check public interfaces and preserve compatibility.\n",
+    ".claude/skills/review/scripts/check.py": "#!/usr/bin/env python3\nraise SystemExit('Fixture only: do not execute during configuration audits.')\n",
+    ".mcp.json": "{\n  \"mcpServers\": {\n    \"docs\": {\n      \"type\": \"http\",\n      \"url\": \"https://docs.example.invalid/mcp\",\n      \"headers\": {\n        \"Authorization\": \"Bearer ${DOCS_TOKEN}\"\n      }\n    }\n  }\n}\n"
+  },
+  "binary_files": {
+    ".claude/skills/review/assets/example.bin": "00ff10"
+  },
+  "executable_files": [
+    ".claude/skills/review/scripts/check.py"
+  ],
+  "launch_directory": "."
+}
